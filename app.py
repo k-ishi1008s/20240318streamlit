@@ -107,7 +107,7 @@ if st.session_state.page_id == 'page1':
     else:
         st.success(f'あなたのユーザー名は {st.session_state.user_name} です')
 
-conn = sqlite3.connect('data_test2.db')
+conn = sqlite3.connect('data2.db')
 c = conn.cursor()
 
 if st.session_state.user_name is not None and st.session_state.access_check==False:
