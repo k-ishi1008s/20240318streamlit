@@ -13,10 +13,9 @@ st.header("AIによって生成したピクトグラムの評価実験")
 
 if 'user_name' not in st.session_state:
     st.session_state.user_name = None
-data = None
 if 'access_check' not in st.session_state:
     st.session_state.access_check = False
-
+data = None
 imgsum = 50 #画像の合計枚数
 sleeptime = 5 #表示時間
 countdown = 25 #表示時間＋カウントダウン＝制限時間
@@ -107,12 +106,11 @@ if st.session_state.page_id == 'page1':
             st.text('ユーザー名は一度しか入力できません')
     else:
         st.success(f'あなたのユーザー名は {st.session_state.user_name} です')
-        
-conn = sqlite3.connect('data_test.db')
+
+conn = sqlite3.connect('data_test2.db')
 c = conn.cursor()
+
 if st.session_state.user_name is not None and st.session_state.access_check==False:
-    conn = sqlite3.connect('data.db')
-    c = conn.cursor()
     # 入力を保存するテーブル
     c.execute(f'''
         CREATE TABLE IF NOT EXISTS {st.session_state.user_name}(
@@ -129,11 +127,9 @@ if st.session_state.user_name is not None and st.session_state.access_check==Fal
     else:
         st.success('このユーザー名は使用可能です！')
         st.session_state.access_check = True
-    
     #Excelファイル生成
     all_data = c.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';").fetchall()
     excel_data = io.BytesIO()
-    
     with pd.ExcelWriter(excel_data, engine='openpyxl') as writer:
         pd.DataFrame(columns=[]).to_excel(writer, index=False, sheet_name='EmptySheet', header=True)
         for table_name, in all_data:
@@ -172,11 +168,12 @@ def show_question(imgIndex):
         c.execute(f'INSERT INTO {st.session_state.user_name}(image_number,input_text,time,timelimit) VALUES (?, ?, ?, ?)',
                   (imgIndex, input_text, elapsed_time, elapsed_time <= timelimit))
         conn.commit()
+
         if elapsed_time <= timelimit:
             st.success('送信完了です．次へ進んでください．')
         else:
             st.warning('制限時間切れです．次へ進んでください．')
-            
+
         st.session_state.imgIndex += 1
         st.session_state.otherQ = False
         st.button('閉じる')
@@ -227,6 +224,13 @@ def page2():
     st.success(f'あなたのユーザー名は {st.session_state.user_name} です')
     st.subheader('例題')
     st.text('例題は何度も解くことができます．完了したら画面下部のボタンから本番へ進んでください．')
+    st.info("""
+            
+            **回答のヒント**: 
+            
+            回答は分かる範囲でOKです．具体名まで合っていると正解としています．例題では「おにぎり」が正解ですが，「食べ物」の場合は一部正解として集計します．
+            
+            """)
     if st.button('例題を開始する'):
         st.session_state.example = True
     st.divider()
