@@ -16,6 +16,8 @@ if 'user_name' not in st.session_state:
 if 'access_check' not in st.session_state:
     st.session_state.access_check = False
 data = None
+#入力した人数を数える
+counter = 0
 imgsum = 50 #画像の合計枚数
 sleeptime = 5 #表示時間
 countdown = 25 #表示時間＋カウントダウン＝制限時間
@@ -133,14 +135,16 @@ if st.session_state.user_name is not None and st.session_state.access_check==Fal
     with pd.ExcelWriter(excel_data, engine='openpyxl') as writer:
         pd.DataFrame(columns=[]).to_excel(writer, index=False, sheet_name='EmptySheet', header=True)
         for table_name, in all_data:
+            counter = counter + 1 
             user_df = pd.read_sql_query(f'SELECT * FROM {table_name}', conn)
             user_df.to_excel(writer, index=False, sheet_name=table_name, header=True)
     #ファイルの先頭に戻す
     excel_data.seek(0)
-    if st.session_state.user_name == 'ishibashi':
+    if st.session_state.user_name == 'opantyuusagi':
+        st.write(f'現在の人数は {counter}人です')
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         excel_filename = f'user_data_{current_time}.xlsx'
-        st.download_button(label='管理者用pass', data=excel_data, file_name=excel_filename, key='download_data')
+        st.download_button(label='押すな！！', data=excel_data, file_name=excel_filename, key='download_data')
 
 def display_image(i):
     img = Image.open(image_folder + f'{i}.png')
